@@ -1,0 +1,113 @@
+package org.BigDefi.sign
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import kotlinx.android.synthetic.main.activity_sign_text.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.kethereum.crypto.toHex
+import org.kethereum.eip191.signWithEIP191PersonalSign
+import org.kethereum.keystore.api.KeyStore
+import org.kethereum.model.Address
+import org.koin.android.ext.android.inject
+import org.komputing.khex.extensions.hexToByteArray
+import org.komputing.khex.extensions.toHexString
+import org.komputing.khex.model.HexString
+import org.ligi.kaxtui.alert
+import org.BigDefi.R
+import org.BigDefi.base_activities.BaseSubActivity
+import org.BigDefi.data.*
+import org.BigDefi.data.addresses.CurrentAddressProvider
+import org.BigDefi.data.addresses.getSpec
+import org.BigDefi.nfc.getNFCSignTextIntent
+import org.BigDefi.util.security.getPasswordForAccountType
+
+class SignTextActivity : BaseSubActivity() {
+
+    private val keyStore: KeyStore by inject()
+    private val currentAddressProvider: CurrentAddressProvider by inject()
+
+    private val currentAddress by lazy { currentAddressProvider.getCurrentNeverNull() }
+    private val appDatabase: AppDatabase by inject()
+
+    private val text by lazy { HexString(intent.getStringExtra(Intent.EXTRA_TEXT)).hexToByteArray() }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_sign_text)
+
+        textToSign.text = String(text)
+
+        lifecycleScope.launch(Dispatchers.Default) {
+
+
+            val account = appDatabase.addressBook.byAddress(currentAddress)
+
+            lifecycleScope.launch(Dispatchers.Main) {
+                when (val type = account.getSpec()?.type) {
+                    ACCOUNT_TYPE_PIN_PROTECTED, ACCOUNT_TYPE_BURNER, ACCOUNT_TYPE_PASSWORD_PROTECTED -> getPasswordForAccountType(type) { pwd ->
+                        if (pwd != null) {
+                            signTextWithPassword(currentAddress, pwd)
+                        }
+                    }
+                    ACCOUNT_TYPE_NFC -> {
+                        fab.setImageResource(R.drawable.ic_nfc_black)
+                        fab.setOnClickListener {
+                            startActivityForResult(getNFCSignTextIntent(text.toHexString(), currentAddress.cleanHex), REQUEST_CODE_NFC)
+                        }
+                    }
+                    ACCOUNT_TYPE_TREZOR -> alert("signing text not yet supported for TREZOR")
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        val putExtra = Intent()
+                .putExtra("SIGNATURE", data?.getStringExtra("HEX"))
+                .putExtra("ADDRESS", currentAddress.cleanHex)
+        setResult(Activity.RESULT_OK, putExtra)
+
+        finish()
+    }
+
+    private fun signTextWithPassword(currentAddress: Address, password: String) {
+        val key = keyStore.getKeyForAddress(currentAddress, password)
+
+        if (key == null) {
+            lifecycleScope.launch(Dispatchers.Main) {
+                val accountName = withContext(Dispatchers.Default) {
+                    appDatabase.addressBook.byAddress(currentAddress)?.name ?: currentAddress.hex
+                }
+                alert("No key for $accountName") {
+                    finish()
+                }
+            }
+        } else {
+            appDatabase.addressBook.byAddressLiveData(currentAddress).observe(this, Observer { entry ->
+                supportActionBar?.subtitle = "Signing as " + (entry?.name ?: currentAddress.hex)
+            })
+
+
+
+            fab.setOnClickListener {
+
+                val signature = key.signWithEIP191PersonalSign(text)
+
+                val putExtra = Intent()
+                        .putExtra("SIGNATURE", signature.toHex())
+                        .putExtra("ADDRESS", currentAddress.cleanHex)
+                setResult(Activity.RESULT_OK, putExtra)
+                finish()
+            }
+        }
+    }
+
+}

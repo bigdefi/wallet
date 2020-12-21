@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+          package="org.BigDefi">
+
+    <uses-sdk tools:overrideLibrary="org.BigDefi.khartwarewallet.lib,im.status.hardwallet_lite_android"/>
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-permission android:name="android.permission.NFC"/>
+
+    <uses-feature android:name="android.hardware.nfc" android:required="false"/>
+    <uses-feature android:name="android.hardware.nfc.hce" android:required="false" tools:replace="android:required"/>
+
+    <uses-feature android:name="android.hardware.camera"
+                  android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"
+                  android:required="false"/>
+    <application
+            android:allowBackup="true"
+            android:fullBackupContent="@xml/backup_rules"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:name=".App"
+
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
+
+        <service android:name="org.BigDefi.notifications.TransactionNotificationService"/>
+
+        <activity android:name="org.BigDefi.qr.scan.QRScanActivity"/>
+
+        <activity android:name="org.BigDefi.chains.SwitchChainActivity"/>
+        <activity android:name="org.BigDefi.request.RequestActivity"/>
+        <activity android:name="org.BigDefi.qr.show.ShowQRCodeActivity"/>
+        <activity android:name="org.BigDefi.info.BigDefiInfoActivity"/>
+        <activity android:name="org.BigDefi.debug.DebugBigDefiActivity"/>
+
+        <activity android:name="org.BigDefi.trezor.TrezorSignTransactionActivity"/>
+        <activity android:name="org.BigDefi.trezor.TrezorGetAddressActivity"/>
+
+        <activity android:name="org.BigDefi.nfc.NFCGetAddressActivity"/>
+        <activity android:name="org.BigDefi.nfc.NFCSignTransactionActivity"/>
+
+        <activity android:name="org.BigDefi.walletconnect.WalletConnectConnectionActivity"/>
+        <activity android:name="org.BigDefi.walletconnect.WalletConnectErrorActivity"/>
+
+        <activity android:name="org.BigDefi.accounts.ExportKeyActivity"/>
+        <activity android:name="org.BigDefi.accounts.EditAccountActivity"/>
+        <activity android:name="org.BigDefi.preferences.reference.SelectReferenceActivity"/>
+        <activity android:name="org.BigDefi.sign.ParitySignerQRActivity"/>
+        <activity android:name="org.BigDefi.sign.SignTextActivity"/>
+        <activity android:name="org.BigDefi.tokens.SelectTokenActivity"/>
+        <activity android:name="org.BigDefi.tokens.CreateTokenDefinitionActivity"/>
+        <activity android:name="org.BigDefi.securityinfo.SecurityInfoActivity"/>
+
+        <activity android:name="org.BigDefi.preferences.PreferenceActivity"/>
+
+        <activity android:name="org.BigDefi.transactions.CreateTransactionActivity"/>
+        <activity android:name="org.BigDefi.transactions.ViewTransactionActivity"/>
+
+        <activity android:name="org.BigDefi.toolbar.ToolbarSetupActivity"/>
+
+        <activity android:name="org.BigDefi.intents.IntentHandlerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data
+                        android:scheme="ethereum"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data
+                        android:scheme="wc"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="org.BigDefi.overview.OverviewActivity"/>
+
+        <activity
+                android:name=".info.OpenSourceLicenseInfoActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.VIEW"/>
+                <data android:scheme="org.BigDefi.licenses"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="org.BigDefi.transactions.OfflineTransactionActivity"
+                  android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name="org.BigDefi.accounts.CreateAccountActivity"/>
+        <activity android:name="org.BigDefi.accounts.NewAccountTypeSelectActivity"/>
+        <activity android:name="org.BigDefi.accounts.AccountPickActivity"/>
+        <activity android:name="org.BigDefi.accounts.SwitchAccountActivity"/>
+        <activity android:name="org.BigDefi.accounts.ImportKeyActivity"/>
+
+        <activity android:name=".startup.StartupActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <meta-data android:name="android.app.shortcuts"
+                       android:resource="@xml/shortcuts"/>
+        </activity>
+        <activity android:name="org.BigDefi.nfc.NFCEnterCredentialsActivity"
+                  android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name="org.BigDefi.nfc.NDEFTagHandlingActivity">
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="vnd.android.nfc" android:host="ext"
+                      android:pathPrefix="/android.com:pkg"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="org.BigDefi.credentials.RequestPINActivity"/>
+        <activity android:name="org.BigDefi.credentials.RequestPasswordActivity"
+                  android:windowSoftInputMode="adjustResize"/>
+        <activity android:name="org.BigDefi.accounts.ImportAsActivity"/>
+        <activity android:name="org.BigDefi.qr.scan.QRScanActivityAndProcessActivity"/>
+        <activity android:name="org.BigDefi.nfc.NFCSignTextActivity"/>
+        <activity android:name="org.BigDefi.chains.EditChainActivity"/>
+        <activity android:name=".activities.TincubETHActivity"/>
+        <activity android:name=".info.WarningActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="BigDefiwarn"/>
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
